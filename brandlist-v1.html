@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>유럽 명품 부티크 및 유통사 분석 리포트</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Chosen Palette: Luxury Minimalist */
+        /* Background: #F9FAFB (Cool Gray 50) */
+        /* Text: #111827 (Gray 900) */
+        /* Accent: #C0A062 (Muted Gold) for luxury feel, #1E3A8A (Dark Blue) for trust */
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #F9FAFB;
+            color: #1F2937;
+        }
+        
+        h1, h2, h3, .serif-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom Scrollbar for Table */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #D1D5DB; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #9CA3AF; 
+        }
+
+        .highlight-row {
+            background-color: #EFF6FF !important; /* Blue-50 */
+            border-left: 4px solid #1E3A8A;
+        }
+    </style>
+    
+    <!-- Application Structure Plan: 
+         1. Header: Professional context setting for the ecommerce developer user.
+         2. Dashboard Section: High-level visual summary (Country distribution, Business Type).
+         3. Interactive "Excel" List: The core request. A detailed, filterable, sortable table.
+         4. Detail View: A dynamic panel that updates when a table row is clicked, showing deep-dive details (Brands, Features, URL).
+         5. Visual Analysis: Scatter plot comparing Price Positioning vs. Inventory Scale.
+         WHY: This structure allows the user to first see the landscape (Dashboard), then work with the data (Table), and finally analyze specifics (Detail/Charts) without navigating away.
+    -->
+    
+    <!-- Visualization & Content Choices:
+         1. Distribution Chart (Doughnut): Shows the geographic focus of these vendors.
+         2. Interactive Table: Replaces a static Excel sheet. Allows sorting/filtering which is better for research.
+         3. Positioning Map (Scatter): Visualizes where each retailer sits in the market (e.g., Boutique vs Dept Store, Curated vs Massive).
+         4. Detail Cards: Provides the text-heavy "Characteristics" and "Main Brands" info on demand to keep the UI clean.
+         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="antialiased selection:bg-blue-100 selection:text-blue-900">
+
+    <!-- Top Navigation / Header -->
+    <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-gray-900 text-white flex items-center justify-center font-serif font-bold rounded">E</div>
+                <h1 class="text-xl font-bold text-gray-900 tracking-tight">EuroLuxury <span class="text-gray-500 font-normal text-base">Market Research 2025</span></h1>
+            </div>
+            <div class="text-sm text-gray-500 hidden md:block">
+                For E-commerce Professionals
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <!-- Intro Section -->
+        <section>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+                <h2 class="text-2xl font-serif font-bold text-gray-900 mb-4">유럽 명품·부티크 유통사 분석 (Top 15)</h2>
+                <p class="text-gray-600 leading-relaxed max-w-4xl">
+                    본 리포트는 이커머스 사업자 및 개발자를 위해 작성되었습니다. 2025년 11월 기준, 유럽을 거점으로 활동하며 글로벌 명품 및 하이엔드 스포츠 브랜드를 취급하는 주요 15개 업체를 분석합니다. 
+                    아래 대시보드를 통해 각 업체의 <strong>비즈니스 유형(백화점, 편집샵, 플랫폼 등)</strong>과 <strong>주요 특징</strong>을 인터랙티브하게 탐색할 수 있습니다. 
+                    데이터 행을 클릭하여 상세 정보를 확인하십시오.
+                </p>
+            </div>
+        </section>
+
+        <!-- Analytics Dashboard -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Chart 1: Business Type Distribution -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col">
+                <div class="mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">비즈니스 유형 분포</h3>
+                    <p class="text-sm text-gray-500">리스트업된 15개 업체의 주요 사업 형태 비율입니다.</p>
+                </div>
+                <div class="flex-grow flex items-center justify-center bg-gray-50 rounded-lg p-4">
+                    <div class="chart-container">
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart 2: Country Presence -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col">
+                <div class="mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">국가별 분포 (거점)</h3>
+                    <p class="text-sm text-gray-500">주요 본사 및 물류 거점 위치입니다.</p>
+                </div>
+                <div class="flex-grow flex items-center justify-center bg-gray-50 rounded-lg p-4">
+                    <div class="chart-container">
+                        <canvas id="countryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Data Explorer Section -->
+        <section class="flex flex-col xl:flex-row gap-8 items-start">
+            
+            <!-- Left: Filterable List (Excel Style) -->
+            <div class="w-full xl:w-2/3 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-[800px]">
+                <div class="p-5 border-b border-gray-200 bg-gray-50 flex flex-wrap gap-4 items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <span>📊 업체 리스트</span>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full" id="countBadge">15개사</span>
+                        </h3>
+                        <p class="text-xs text-gray-500 mt-1">행을 클릭하여 우측 상세 패널에서 정보를 확인하세요.</p>
+                    </div>
+                    
+                    <!-- Filters -->
+                    <div class="flex gap-2">
+                        <select id="countryFilter" class="text-sm border-gray-300 border rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-1.5">
+                            <option value="all">모든 국가</option>
+                            <option value="UK">영국</option>
+                            <option value="France">프랑스</option>
+                            <option value="Italy">이탈리아</option>
+                            <option value="Germany">독일</option>
+                            <option value="Other">기타</option>
+                        </select>
+                        <select id="typeFilter" class="text-sm border-gray-300 border rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-1.5">
+                            <option value="all">모든 유형</option>
+                            <option value="Boutique">편집샵 (Boutique)</option>
+                            <option value="Department">백화점 (Dept. Store)</option>
+                            <option value="Platform">플랫폼 (Platform)</option>
+                            <option value="Vintage">빈티지 (Vintage)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Table Header -->
+                <div class="grid grid-cols-12 bg-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200 py-3 px-4">
+                    <div class="col-span-3">업체명</div>
+                    <div class="col-span-2">국가/도시</div>
+                    <div class="col-span-2">유형</div>
+                    <div class="col-span-3">주요 특징 (요약)</div>
+                    <div class="col-span-2 text-right">Action</div>
+                </div>
+
+                <!-- Scrollable Table Body -->
+                <div class="overflow-y-auto custom-scrollbar flex-grow" id="tableBody">
+                    <!-- Rows will be populated by JS -->
+                </div>
+            </div>
+
+            <!-- Right: Detail Panel -->
+            <div class="w-full xl:w-1/3 bg-white rounded-xl shadow-lg border border-blue-100 p-6 sticky top-24 transition-all duration-300" id="detailPanel">
+                <div id="emptyState" class="h-full flex flex-col items-center justify-center text-gray-400 py-20">
+                    <div class="text-4xl mb-4">👈</div>
+                    <p>좌측 리스트에서 업체를 선택하세요.</p>
+                </div>
+
+                <div id="contentState" class="hidden space-y-6">
+                    <!-- Header -->
+                    <div class="border-b border-gray-100 pb-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span id="detailType" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded uppercase tracking-wide">TYPE</span>
+                                <h2 id="detailName" class="text-3xl font-serif font-bold text-gray-900 mt-2">Name</h2>
+                                <p id="detailLocation" class="text-sm text-gray-500 flex items-center gap-1 mt-1">📍 Location</p>
+                            </div>
+                            <a id="detailLink" href="#" target="_blank" class="flex items-center justify-center w-10 h-10 bg-gray-900 text-white rounded-full hover:bg-blue-700 transition-colors shadow-md" title="사이트 방문">
+                                <span>↗</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Characteristics -->
+                    <div>
+                        <h4 class="text-sm font-bold text-gray-900 uppercase mb-2 border-l-4 border-yellow-400 pl-2">특징 및 분석</h4>
+                        <p id="detailDesc" class="text-gray-600 text-sm leading-relaxed">
+                            Description goes here.
+                        </p>
+                    </div>
+
+                    <!-- Brands -->
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                        <h4 class="text-sm font-bold text-gray-900 uppercase mb-2">주요 취급 브랜드 & 스타일</h4>
+                        <div id="detailBrands" class="flex flex-wrap gap-2">
+                            <!-- Tags injected via JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Research Note -->
+                    <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                        <h4 class="text-xs font-bold text-blue-800 uppercase mb-1">💡 개발자/사업자 리서치 노트</h4>
+                        <p id="detailNote" class="text-xs text-blue-900 leading-snug">
+                            Note goes here.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Comparative Visualization -->
+        <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+            <div class="mb-6 border-b border-gray-100 pb-4">
+                <h3 class="text-xl font-bold text-gray-900">시장 포지셔닝 맵 (Market Positioning Map)</h3>
+                <p class="text-sm text-gray-500 mt-1">
+                    각 업체의 <span class="font-semibold text-blue-600">큐레이션 강도(Specialty)</span>와 <span class="font-semibold text-green-600">재고 규모/다양성(Scale)</span>을 기준으로 매핑하였습니다.
+                    <br>우측 상단일수록 규모가 크고 대중적이며, 좌측 하단일수록 니치(Niche)하고 선별적입니다.
+                </p>
+            </div>
+            <div class="w-full h-[500px] bg-gray-50 rounded-xl relative border border-gray-200 flex items-center justify-center overflow-hidden">
+                <div class="chart-container" style="max-width: 90%; height: 90%; max-height: 90%;">
+                    <canvas id="positionMap"></canvas>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-gray-400 text-sm">© 2025 Luxury Market Research Tool. Data based on November 2025 analysis.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- DATA STORE ---
+        const vendors = [
+            {
+                id: 1,
+                name: "LN-CC",
+                country: "UK",
+                city: "London",
+                type: "Boutique",
+                url: "https://www.ln-cc.com",
+                brands: ["Gucci", "Saint Laurent", "Acne Studios", "Bottega Veneta"],
+                desc: "'Late Night Chameleon Café'의 약자로, 런던 이스트의 컨셉 스토어에서 시작되었습니다. 아방가르드하고 예술적인 큐레이션이 특징이며, 친환경적 이니셔티브와 희귀 서적/음반도 함께 판매하는 문화 복합적 성격을 띱니다.",
+                note: "일반적인 커머스보다 '편집' 능력이 뛰어남. UI/UX가 매우 실험적인 경우가 많음. API 연동보다는 독점 상품 소싱처로 참고.",
+                position: { x: 80, y: 30 } // x: Scale, y: Curation (High curation)
+            },
+            {
+                id: 2,
+                name: "SSENSE",
+                country: "Canada", // Operating heavily in Europe
+                city: "Montreal (Global)",
+                type: "Platform",
+                url: "https://www.ssense.com",
+                brands: ["Essentials", "Rick Owens", "Nike", "Balenciaga", "Maison Margiela"],
+                desc: "캐나다 기반이지만 유럽 배송이 매우 활발하며 유럽 내 입지가 강력합니다. 방대한 인벤토리를 보유하고 있으며, 특히 MZ세대를 타겟으로 한 하이엔드 스트릿웨어와 신진 디자이너 발굴에 강점이 있습니다. 미니멀하고 브루탈리즘적인 웹 디자인이 특징입니다.",
+                note: "데이터 구조가 매우 정갈하며 SKU 수가 압도적임. 트렌드 분석의 지표로 활용하기 가장 좋음. 세일 기간 트래픽 폭주.",
+                position: { x: 90, y: 50 }
+            },
+            {
+                id: 3,
+                name: "MATCHES",
+                country: "UK",
+                city: "London",
+                type: "Boutique",
+                url: "https://www.matchesfashion.com",
+                brands: ["Raey (PB)", "Zimmermann", "The Row", "Valentino"],
+                desc: "전통적인 럭셔리 편집샵의 온라인 강자입니다. 고급스러운 패키징(마블 박스)과 큐레이션 서비스가 특징이며, 자체 브랜드 'Raey'를 보유하고 있습니다. 최근 프레이저스 그룹에 인수되는 등 경영상 변화가 있었으나 여전히 강력한 바잉 파워를 가집니다.",
+                note: "충성 고객층이 두터우며, VIP 프라이빗 쇼핑 기능이 잘 발달되어 있음. 클래식 럭셔리 소싱에 적합.",
+                position: { x: 75, y: 70 }
+            },
+            {
+                id: 4,
+                name: "FARFETCH",
+                country: "UK",
+                city: "Global",
+                type: "Platform",
+                url: "https://www.farfetch.com",
+                brands: ["All Luxury Brands", "Off-White", "Palm Angels"],
+                desc: "직매입보다는 전 세계 수백 개의 부티크를 연결하는 마켓플레이스 모델입니다. 따라서 재고의 깊이보다는 너비(다양성)가 압도적입니다. 희귀한 사이즈나 지난 시즌 상품을 찾기에 유리합니다.",
+                note: "재고를 보유하지 않는 모델(일부 제외)이므로 기술적 연동(API)이 핵심인 기업. 가격 변동성이 큼.",
+                position: { x: 95, y: 20 }
+            },
+            {
+                id: 5,
+                name: "Mytheresa",
+                country: "Germany",
+                city: "Munich",
+                type: "Boutique",
+                url: "https://www.mytheresa.com",
+                brands: ["Roger Vivier", "Loewe", "Moncler", "Loro Piana"],
+                desc: "독일 뮌헨 기반으로, 여성복 럭셔리에서 시작해 남성/키즈/라이프스타일로 확장했습니다. 가장 엄선된(Curated) 제품만을 취급하며, 재고 관리와 배송 신뢰도가 업계 최고 수준입니다. IPO에 성공하며 재무적으로 안정적인 편입니다.",
+                note: "가품 이슈가 거의 없는 가장 신뢰도 높은 소싱처. 큐레이션의 질이 매우 높아 베스트셀러 예측에 유용.",
+                position: { x: 70, y: 85 }
+            },
+            {
+                id: 6,
+                name: "24S",
+                country: "France",
+                city: "Paris",
+                type: "Department", // Le Bon Marché connection
+                url: "https://www.24s.com",
+                brands: ["Louis Vuitton", "Celine", "Dior", "Moynat"],
+                desc: "LVMH 그룹이 소유한 르 봉 마르셰(Le Bon Marché) 백화점의 온라인 버전입니다. 루이비통, 디올, 셀린느 등 LVMH 핵심 브랜드의 온라인 독점 유통 채널 역할을 합니다. 파리지앵 시크 스타일이 주를 이룹니다.",
+                note: "LVMH 계열 브랜드 소싱을 위해서는 반드시 체크해야 함. 'La Carte 24 Sèvres' 로열티 프로그램 운영.",
+                position: { x: 60, y: 90 }
+            },
+            {
+                id: 7,
+                name: "BROWNS",
+                country: "UK",
+                city: "London",
+                type: "Boutique",
+                url: "https://www.brownsfashion.com",
+                brands: ["Alexander McQueen", "Versace", "Burberry"],
+                desc: "1970년대부터 알렉산더 맥퀸, 존 갈리아노 등을 발굴한 런던의 아이코닉한 부티크입니다. 파페치에 인수되었으나 독자적인 아이덴티티와 오프라인 경험(Browns East 등)을 유지하며 혁신적인 리테일 실험을 지속합니다.",
+                note: "Farfetch의 기술력이 접목된 오프라인 매장 운영. 옴니채널 전략 연구 시 좋은 사례.",
+                position: { x: 50, y: 80 }
+            },
+            {
+                id: 8,
+                name: "END.",
+                country: "UK",
+                city: "Newcastle",
+                type: "Boutique",
+                url: "https://www.endclothing.com",
+                brands: ["Nike", "Adidas", "Stone Island", "Neighborhood"],
+                desc: "남성 컨템포러리 및 하이엔드 스트릿웨어의 강자입니다. 특히 한정판 스니커즈 추첨 시스템(Launches)이 유명하며, 스포츠 브랜드와 럭셔리 브랜드의 콜라보레이션 제품을 가장 많이 취급하는 곳 중 하나입니다.",
+                note: "스포츠/스트릿 고가 브랜드 취급 시 1순위 레퍼런스. 드로우 시스템(Raffle) UIUX 벤치마킹 대상.",
+                position: { x: 85, y: 40 }
+            },
+            {
+                id: 9,
+                name: "Luisaviaroma",
+                country: "Italy",
+                city: "Florence",
+                type: "Boutique",
+                url: "https://www.luisaviaroma.com",
+                brands: ["Balmain", "Dolce & Gabbana", "Thom Browne"],
+                desc: "피렌체 기반의 유서 깊은 리테일러입니다. 'Firenze4Ever' 같은 이벤트를 통해 인플루언서 마케팅을 선도했습니다. 프리오더(Pre-order) 시스템이 발달하여 다음 시즌 상품을 미리 확보하기 좋습니다.",
+                note: "시즌 신상품을 가장 빨리 만나볼 수 있는 곳 중 하나. 홈웨어(LVR Home) 카테고리도 강력함.",
+                position: { x: 75, y: 60 }
+            },
+            {
+                id: 10,
+                name: "TheDoubleF",
+                country: "Italy",
+                city: "Milan",
+                type: "Boutique",
+                url: "https://www.thedoublef.com",
+                brands: ["Prada", "Miu Miu", "Off-White", "Golden Goose"],
+                desc: "이탈리아 Folli Follie 그룹의 이커머스 채널입니다. 이탈리아 현지 브랜드 소싱 능력이 탁월하며, 구찌, 프라다 등 이탈리아 하우스 브랜드의 물량이 풍부합니다.",
+                note: "이탈리아 브랜드 매입 시 가격 경쟁력이 종종 보임. 상대적으로 덜 알려져 있어 틈새 소싱 가능.",
+                position: { x: 55, y: 65 }
+            },
+            {
+                id: 11,
+                name: "Leclaireur",
+                country: "France",
+                city: "Paris",
+                type: "Boutique",
+                url: "https://leclaireur.com",
+                brands: ["Rick Owens", "Yohji Yamamoto", "Undercover", "Design Objects"],
+                desc: "단순한 패션 매장을 넘어 디자인과 예술을 결합한 갤러리형 편집샵의 시초입니다. 매우 아방가르드하고 실험적인 브랜드, 혹은 장인정신이 깃든 니치 브랜드를 주로 취급합니다.",
+                note: "희소성 있는 하이엔드/아방가르드 브랜드 발굴에 최적. 대중성보다는 매니아층 타겟.",
+                position: { x: 20, y: 95 }
+            },
+            {
+                id: 12,
+                name: "Harvey Nichols",
+                country: "UK",
+                city: "London",
+                type: "Department",
+                url: "https://www.harveynichols.com",
+                brands: ["Givenchy", "Fendi", "Jacquemus", "Manolo Blahnik"],
+                desc: "영국 럭셔리 백화점으로 패션뿐만 아니라 뷰티, 식품(Food Hall)으로도 유명합니다. 젊고 트렌디한 럭셔리를 지향하며, 신진 디자이너 팝업 등을 자주 진행합니다.",
+                note: "백화점 기반이라 재고 안정성이 높음. 뷰티 및 라이프스타일 카테고리 확장 시 참고.",
+                position: { x: 80, y: 55 }
+            },
+            {
+                id: 13,
+                name: "Selfridges",
+                country: "UK",
+                city: "London",
+                type: "Department",
+                url: "https://www.selfridges.com",
+                brands: ["Tiffany & Co.", "Prada", "Skims", "Kith"],
+                desc: "혁신적인 리테일 경험으로 유명한 영국의 아이코닉한 백화점입니다. 'Project Earth'와 같은 지속가능성 캠페인을 주도하며, 리세일, 렌탈 서비스 등 순환 경제 모델을 적극 도입하고 있습니다.",
+                note: "ESG 경영 및 순환 경제(Resell/Rental) 비즈니스 모델 벤치마킹 1순위.",
+                position: { x: 90, y: 60 }
+            },
+            {
+                id: 14,
+                name: "Harrods",
+                country: "UK",
+                city: "London",
+                type: "Department",
+                url: "https://www.harrods.com",
+                brands: ["Chanel", "Hermès", "Rolex", "Fine Jewelry"],
+                desc: "세계에서 가장 유명한 럭셔리 백화점 중 하나로, 압도적인 규모와 초고가 라인업을 자랑합니다. 런던 나이츠브리지의 상징이며, 온라인에서도 그 럭셔리한 경험을 제공하려 노력합니다.",
+                note: "초고가 하이엔드 및 파인 주얼리/워치 카테고리 분석 시 필수.",
+                position: { x: 85, y: 75 }
+            },
+            {
+                id: 15,
+                name: "ÉTOILE",
+                country: "Netherlands",
+                city: "Amsterdam",
+                type: "Vintage",
+                url: "https://etoile-luxuryvintage.com",
+                brands: ["Vintage Chanel", "Vintage Louis Vuitton", "Hermès Bags"],
+                desc: "암스테르담 기반의 럭셔리 빈티지 전문 부티크입니다. 전 세계적으로 희귀한 샤넬, 루이비통, 에르메스 등의 빈티지 가방과 액세서리를 전문적으로 취급하며 정품 검수 능력이 탁월합니다.",
+                note: "세컨핸드/빈티지 시장 확대에 따른 주요 플레이어. 리세일 가격 책정 및 상태 등급 분류 참고.",
+                position: { x: 30, y: 90 }
+            }
+        ];
+
+        // --- DOM ELEMENTS ---
+        const tableBody = document.getElementById('tableBody');
+        const countryFilter = document.getElementById('countryFilter');
+        const typeFilter = document.getElementById('typeFilter');
+        const countBadge = document.getElementById('countBadge');
+        const detailPanel = document.getElementById('detailPanel');
+        const emptyState = document.getElementById('emptyState');
+        const contentState = document.getElementById('contentState');
+
+        // Detail Elements
+        const dName = document.getElementById('detailName');
+        const dType = document.getElementById('detailType');
+        const dLoc = document.getElementById('detailLocation');
+        const dDesc = document.getElementById('detailDesc');
+        const dNote = document.getElementById('detailNote');
+        const dBrands = document.getElementById('detailBrands');
+        const dLink = document.getElementById('detailLink');
+
+        let currentData = [...vendors];
+
+        // --- RENDER FUNCTIONS ---
+
+        function renderTable(data) {
+            tableBody.innerHTML = '';
+            countBadge.textContent = `${data.length}개사`;
+
+            data.forEach(vendor => {
+                const row = document.createElement('div');
+                row.className = 'grid grid-cols-12 border-b border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors duration-150 py-3 px-4 items-center group';
+                row.dataset.id = vendor.id;
+                
+                // Color code for type
+                let typeColor = 'bg-gray-100 text-gray-600';
+                if(vendor.type === 'Boutique') typeColor = 'bg-purple-100 text-purple-700';
+                if(vendor.type === 'Department') typeColor = 'bg-indigo-100 text-indigo-700';
+                if(vendor.type === 'Platform') typeColor = 'bg-green-100 text-green-700';
+                if(vendor.type === 'Vintage') typeColor = 'bg-amber-100 text-amber-700';
+
+                // Flag Logic (Simple Emoji)
+                const flags = { "UK": "🇬🇧", "France": "🇫🇷", "Italy": "🇮🇹", "Germany": "🇩🇪", "Netherlands": "🇳🇱", "Canada": "🇨🇦" };
+                const flag = flags[vendor.country] || "🇪🇺";
+
+                row.innerHTML = `
+                    <div class="col-span-3 font-bold text-gray-900 group-hover:text-blue-700">${vendor.name}</div>
+                    <div class="col-span-2 text-sm text-gray-500">${flag} ${vendor.country}</div>
+                    <div class="col-span-2">
+                        <span class="text-xs px-2 py-1 rounded-full font-medium ${typeColor}">${vendor.type}</span>
+                    </div>
+                    <div class="col-span-3 text-xs text-gray-500 truncate pr-2">${vendor.desc}</div>
+                    <div class="col-span-2 text-right">
+                        <span class="text-xs text-blue-600 opacity-0 group-hover:opacity-100 font-medium">상세보기 →</span>
+                    </div>
+                `;
+
+                row.addEventListener('click', () => {
+                    // Highlight logic
+                    document.querySelectorAll('#tableBody > div').forEach(r => r.classList.remove('highlight-row'));
+                    row.classList.add('highlight-row');
+                    showDetail(vendor);
+                });
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        function showDetail(vendor) {
+            emptyState.classList.add('hidden');
+            contentState.classList.remove('hidden');
+
+            dName.textContent = vendor.name;
+            dType.textContent = vendor.type;
+            dLoc.textContent = `${vendor.city}, ${vendor.country}`;
+            dDesc.textContent = vendor.desc;
+            dNote.textContent = vendor.note;
+            dLink.href = vendor.url;
+
+            dBrands.innerHTML = vendor.brands.map(b => 
+                `<span class="bg-white border border-gray-200 text-gray-700 text-xs px-2 py-1 rounded shadow-sm">${b}</span>`
+            ).join('');
+        }
+
+        function filterData() {
+            const countryVal = countryFilter.value;
+            const typeVal = typeFilter.value;
+
+            currentData = vendors.filter(v => {
+                const matchCountry = countryVal === 'all' || 
+                                     (countryVal === 'Other' ? !['UK','France','Italy','Germany'].includes(v.country) : v.country === countryVal);
+                const matchType = typeVal === 'all' || v.type === typeVal;
+                return matchCountry && matchType;
+            });
+
+            renderTable(currentData);
+        }
+
+        // --- CHART GENERATION ---
+
+        function initCharts() {
+            // 1. Business Type Doughnut Chart
+            const typeCounts = vendors.reduce((acc, curr) => {
+                acc[curr.type] = (acc[curr.type] || 0) + 1;
+                return acc;
+            }, {});
+
+            const typeCtx = document.getElementById('typeChart').getContext('2d');
+            new Chart(typeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(typeCounts),
+                    datasets: [{
+                        data: Object.values(typeCounts),
+                        backgroundColor: ['#A78BFA', '#818CF8', '#34D399', '#FBBF24'], // Matching tailwind colors approx
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 20, font: {family: "'Noto Sans KR', sans-serif"} } }
+                    }
+                }
+            });
+
+            // 2. Country Bar Chart
+            const countryCounts = vendors.reduce((acc, curr) => {
+                acc[curr.country] = (acc[curr.country] || 0) + 1;
+                return acc;
+            }, {});
+
+            const countryCtx = document.getElementById('countryChart').getContext('2d');
+            new Chart(countryCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(countryCounts),
+                    datasets: [{
+                        label: '업체 수',
+                        data: Object.values(countryCounts),
+                        backgroundColor: '#1E3A8A',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            // 3. Positioning Scatter Map
+            const posCtx = document.getElementById('positionMap').getContext('2d');
+            
+            // Transform data for Scatter
+            // X: Scale (Variety/Volume), Y: Curation (Exclusivity/Price)
+            const scatterData = vendors.map(v => ({
+                x: v.position.x,
+                y: v.position.y,
+                name: v.name,
+                type: v.type
+            }));
+
+            new Chart(posCtx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Market Positioning',
+                        data: scatterData,
+                        backgroundColor: function(context) {
+                            const type = context.raw?.type;
+                            if(type === 'Boutique') return '#A78BFA';
+                            if(type === 'Department') return '#818CF8';
+                            if(type === 'Platform') return '#34D399';
+                            return '#FBBF24';
+                        },
+                        pointRadius: 8,
+                        pointHoverRadius: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: { display: true, text: '재고 규모 및 다양성 (Scale ->)' },
+                            min: 0, max: 100,
+                            grid: { color: '#E5E7EB' }
+                        },
+                        y: {
+                            title: { display: true, text: '큐레이션 및 럭셔리 강도 (Luxury ->)' },
+                            min: 0, max: 100,
+                            grid: { color: '#E5E7EB' }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.raw.name;
+                                }
+                            },
+                            backgroundColor: '#1F2937',
+                            padding: 10
+                        },
+                        legend: { display: false } // Custom legend managed by text
+                    }
+                }
+            });
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTable(vendors);
+            initCharts();
+
+            // Event Listeners
+            countryFilter.addEventListener('change', filterData);
+            typeFilter.addEventListener('change', filterData);
+
+            // Select first item by default
+            if(vendors.length > 0) {
+                // Simulate click on first row logic without triggering scroll
+                 const firstRow = document.querySelector('#tableBody > div');
+                 if(firstRow) {
+                     firstRow.classList.add('highlight-row');
+                     showDetail(vendors[0]);
+                 }
+            }
+        });
+
+    </script>
+</body>
+</html>
