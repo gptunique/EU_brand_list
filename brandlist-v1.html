@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>유럽 명품 부티크 및 유통사 분석 리포트</title>
+    <title>유럽 명품 부티크 및 유통사 분석 리포트 (2025)</title>
+    <!-- Favicon error prevention -->
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -69,19 +71,18 @@
     </style>
     
     <!-- Application Structure Plan: 
-         1. Header: Professional context setting for the ecommerce developer user.
-         2. Dashboard Section: High-level visual summary (Country distribution, Business Type).
-         3. Interactive "Excel" List: The core request. A detailed, filterable, sortable table.
-         4. Detail View: A dynamic panel that updates when a table row is clicked, showing deep-dive details (Brands, Features, URL).
-         5. Visual Analysis: Scatter plot comparing Price Positioning vs. Inventory Scale.
-         WHY: This structure allows the user to first see the landscape (Dashboard), then work with the data (Table), and finally analyze specifics (Detail/Charts) without navigating away.
+         1. Header: Professional context setting.
+         2. Dashboard Section: Visual summary (Country, Business Type).
+         3. Interactive "Excel" List: The core request. Filterable, sortable table.
+         4. Detail View: Dynamic panel showing deep-dive details (Brands, Features, URL).
+         5. Visual Analysis: Scatter plot (Price Positioning vs. Inventory Scale).
     -->
     
     <!-- Visualization & Content Choices:
-         1. Distribution Chart (Doughnut): Shows the geographic focus of these vendors.
-         2. Interactive Table: Replaces a static Excel sheet. Allows sorting/filtering which is better for research.
-         3. Positioning Map (Scatter): Visualizes where each retailer sits in the market (e.g., Boutique vs Dept Store, Curated vs Massive).
-         4. Detail Cards: Provides the text-heavy "Characteristics" and "Main Brands" info on demand to keep the UI clean.
+         1. Distribution Chart (Doughnut): Geographic focus.
+         2. Interactive Table: Excel-like replacement.
+         3. Positioning Map (Scatter): Market positioning visualization.
+         4. Detail Cards: Text-heavy info on demand.
          CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
     -->
     
@@ -110,7 +111,7 @@
                 <h2 class="text-2xl font-serif font-bold text-gray-900 mb-4">유럽 명품·부티크 유통사 분석 (Top 15)</h2>
                 <p class="text-gray-600 leading-relaxed max-w-4xl">
                     본 리포트는 이커머스 사업자 및 개발자를 위해 작성되었습니다. 2025년 11월 기준, 유럽을 거점으로 활동하며 글로벌 명품 및 하이엔드 스포츠 브랜드를 취급하는 주요 15개 업체를 분석합니다. 
-                    아래 대시보드를 통해 각 업체의 <strong>비즈니스 유형(백화점, 편집샵, 플랫폼 등)</strong>과 <strong>주요 특징</strong>을 인터랙티브하게 탐색할 수 있습니다. 
+                    아래 대시보드를 통해 각 업체의 <strong>비즈니스 유형</strong>과 <strong>주요 특징</strong>을 인터랙티브하게 탐색할 수 있습니다. 
                     데이터 행을 클릭하여 상세 정보를 확인하십시오.
                 </p>
             </div>
